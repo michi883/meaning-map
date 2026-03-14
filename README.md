@@ -8,15 +8,16 @@ Every message lands differently depending on who reads it. A founder's pitch tha
 
 ## DigitalOcean Gradient AI Full Stack
 
-MeaningMap uses five DigitalOcean Gradient AI platform features end-to-end:
+MeaningMap uses six DigitalOcean Gradient AI platform capabilities end-to-end:
 
 | Layer | DO Service | Usage |
 |---|---|---|
 | **AI Inference** | Gradient GenAI API | LLM calls for persona generation, interpretation agents, and AI rewrites |
 | **Embeddings** | Gradient Embeddings API | Vector embeddings for every analyzed message, enabling semantic search |
-| **Agent Framework** | Gradient ADK | Agent entrypoint, configuration, and deployment (`gradient agent deploy`) |
-| **Database** | Managed PostgreSQL + pgvector | Persistent storage for analyses with vector similarity search |
-| **Hosting** | App Platform | Production deployment with managed database binding, health checks, and auto-deploy |
+| **Agent Framework** | Gradient ADK | `@entrypoint` decorator, agent configuration, local dev via `gradient agent run` |
+| **Agent Platform** | Gradient Agent Platform | Deployed agent accessible at `agents.do-ai.run` for programmatic invocation, with tracing and logs |
+| **Database** | Managed PostgreSQL + pgvector | Persistent storage for analyses with vector similarity search via HNSW index |
+| **Hosting** | App Platform | Web app deployment with health checks and auto-deploy from GitHub |
 
 ## What the Pipeline Does
 
@@ -78,6 +79,7 @@ backend/
   run_local.py                     CLI runner for testing without the web server
 frontend/public/
   index.html                       Page structure: input form, history panel, loading stage, results sections, fix drawer
+  favicon.ico                      App favicon
   assets/
     styles.css                     Dark theme, animations, history/search panel styles, responsive breakpoints
     app.js                         All UI logic: cinematic loading, map, persona cards, risk list, fix drawer, history, search
@@ -87,7 +89,7 @@ tests/
 sample_request.json                Example API request payload
 .env.example                       Template for environment variables
 .gradient/agent.yml                Gradient ADK agent configuration
-.do/app.yaml                       App Platform spec with managed PostgreSQL database
+.do/app.yaml                       App Platform spec (DATABASE_URL points to a Managed PostgreSQL cluster)
 ```
 
 ## Setup
@@ -138,46 +140,51 @@ python -m pytest tests/ -v
 
 ## Deploy to DigitalOcean App Platform (Web App)
 
-This repo now includes an App Platform spec at `.do/app.yaml`.
+The App Platform spec at `.do/app.yaml` deploys the FastAPI web service. The database is a separately provisioned **Managed PostgreSQL cluster** (not an App Platform dev database), because pgvector requires a full managed cluster.
 
-1. Push this codebase to GitHub (App Platform deploys from GitHub repos).
+1. Push this codebase to GitHub.
 2. Edit `.do/app.yaml` and set:
-   - `services[0].git.repo_clone_url` to your public repo URL
+   - `services[0].git.repo_clone_url` to your repo URL
    - `services[0].git.branch` to your deploy branch
    - `GRADIENT_MODEL_ACCESS_KEY` to your real key (starts with `sk-do-`)
-3. Authenticate `doctl`:
+3. Create a Managed PostgreSQL cluster with pgvector support:
+
+```bash
+doctl databases create meaning-map-db --engine pg --version 16 --size db-s-1vcpu-1gb --region nyc1 --num-nodes 1
+```
+
+4. Get the connection URI and set it as `DATABASE_URL` in `.do/app.yaml` (or via the console):
+
+```bash
+doctl databases connection <DB_ID> --format URI --no-header
+```
+
+5. Authenticate and create the app:
 
 ```bash
 doctl auth init --access-token "$DIGITALOCEAN_API_TOKEN"
-```
-
-4. Create the app:
-
-```bash
 doctl apps spec validate .do/app.yaml
 doctl apps create --spec .do/app.yaml
 ```
 
-5. Watch rollout and fetch the live URL:
+6. Watch rollout and verify:
 
 ```bash
 doctl apps list
-doctl apps get <APP_ID>
 doctl apps logs <APP_ID> --type run
+curl https://<app-url>/health   # Should return {"status":"ok","database":true}
 ```
 
-6. Future deploys:
-   - Push to the configured git branch
-   - Then redeploy:
+7. Future deploys — push to the configured branch, then:
 
 ```bash
 doctl apps update <APP_ID> --spec .do/app.yaml
 ```
 
 Notes:
-- `/health` is configured as the app health check.
+- `/health` returns `{"status": "ok", "database": true}` when PostgreSQL + pgvector is connected.
 - The frontend and API are served by the same FastAPI service.
-- Demo mode works without a model key, but `/api/analyze` and `/api/fix` require `GRADIENT_MODEL_ACCESS_KEY`.
+- The app works without `DATABASE_URL` (history/search disabled), but `/api/analyze` always requires `GRADIENT_MODEL_ACCESS_KEY`.
 
 ## Running with Gradient ADK
 
@@ -201,8 +208,26 @@ curl -X POST http://localhost:8080/run \
 
 ## Deploy Gradient ADK Agent
 
+The agent can also be deployed to the **Gradient Agent Platform**, which provides a managed REST endpoint, execution tracing, and runtime logs. This is separate from the App Platform web app — the web app is the browser-facing UI, while the agent endpoint is a machine-facing JSON API for programmatic invocation by other services or agents.
+
 ```bash
 gradient agent deploy
+```
+
+Once deployed, invoke the agent directly:
+
+```bash
+curl -X POST https://agents.do-ai.run/v1/<workspace-id>/meaning-map/run \
+  -H "Authorization: Bearer $DIGITALOCEAN_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d @sample_request.json
+```
+
+Monitor with:
+
+```bash
+gradient agent logs
+gradient agent traces
 ```
 
 ## API Reference
