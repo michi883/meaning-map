@@ -64,6 +64,11 @@ app = FastAPI(title="MeaningMap Web App", version="1.0.0", lifespan=lifespan)
 app.mount("/assets", StaticFiles(directory=str(FRONTEND_PUBLIC_DIR / "assets")), name="assets")
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon() -> FileResponse:
+    return FileResponse(FRONTEND_PUBLIC_DIR / "favicon.ico")
+
+
 @app.get("/")
 async def home() -> FileResponse:
     return FileResponse(FRONTEND_PUBLIC_DIR / "index.html")
