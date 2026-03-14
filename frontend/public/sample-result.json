@@ -1,0 +1,240 @@
+{
+  "generated_at": "2026-03-13T23:31:44.160612Z",
+  "model": "openai-gpt-oss-120b",
+  "input_echo": {
+    "content": "We built an AI copilot for founders that drafts investor updates in 60 seconds and predicts likely investor follow-up questions.",
+    "message_type": "startup_pitch",
+    "context": null,
+    "objective": null,
+    "num_personas": 5,
+    "personas": null,
+    "temperature": 0.2
+  },
+  "personas": [
+    {
+      "name": "Enthusiastic Early Adopter",
+      "worldview": "Looks for bold innovation and upside; tolerant of ambiguity.",
+      "likely_priorities": ["novelty", "speed", "market potential"],
+      "share": 0.24
+    },
+    {
+      "name": "Skeptical Pragmatist",
+      "worldview": "Needs evidence, practical value, and clear tradeoffs before buying in.",
+      "likely_priorities": ["proof", "clarity", "execution risk"],
+      "share": 0.21
+    },
+    {
+      "name": "Budget-Conscious Buyer",
+      "worldview": "Measures outcomes versus cost and worries about hidden complexity.",
+      "likely_priorities": ["price", "ROI", "efficiency"],
+      "share": 0.19
+    },
+    {
+      "name": "Industry Insider",
+      "worldview": "Benchmarks claims against known patterns and competitive context.",
+      "likely_priorities": ["differentiation", "feasibility", "positioning"],
+      "share": 0.2
+    },
+    {
+      "name": "Risk-Averse Decision Maker",
+      "worldview": "Prioritizes downside protection, compliance, and predictable outcomes.",
+      "likely_priorities": ["risk", "reliability", "credibility"],
+      "share": 0.16
+    }
+  ],
+  "interpretations": [
+    {
+      "persona": {
+        "name": "Enthusiastic Early Adopter",
+        "worldview": "Looks for bold innovation and upside; tolerant of ambiguity.",
+        "likely_priorities": ["novelty", "speed", "market potential"],
+        "share": 0.24
+      },
+      "interpretation": "This sounds like a high-leverage founder tool with obvious time savings and momentum potential. The promise feels exciting, but I still want a quick proof of predictive accuracy before fully trusting it.",
+      "quote": "This is exactly the kind of tool I'd try on day one — fast, bold, and built for founders like me.",
+      "key_points": ["Strong novelty", "Time-to-value", "High excitement"],
+      "risks": ["Could sound over-optimistic without evidence"],
+      "signals": {
+        "clarity": 86.0,
+        "trust": 72.0,
+        "hype": 84.0,
+        "confusion": 18.0,
+        "credibility": 68.0
+      },
+      "outlier": false
+    },
+    {
+      "persona": {
+        "name": "Skeptical Pragmatist",
+        "worldview": "Needs evidence, practical value, and clear tradeoffs before buying in.",
+        "likely_priorities": ["proof", "clarity", "execution risk"],
+        "share": 0.21
+      },
+      "interpretation": "The proposition is clear, but the predictive component needs concrete benchmark data and failure modes. I interpret the claim as plausible yet under-supported.",
+      "quote": "Show me the data. '60 seconds' and 'predicts questions' are claims I need to verify before I take this seriously.",
+      "key_points": ["Clear benefit", "Needs benchmarks"],
+      "risks": ["Perceived as marketing language without hard numbers"],
+      "signals": {
+        "clarity": 81.0,
+        "trust": 55.0,
+        "hype": 49.0,
+        "confusion": 26.0,
+        "credibility": 57.0
+      },
+      "outlier": false
+    },
+    {
+      "persona": {
+        "name": "Budget-Conscious Buyer",
+        "worldview": "Measures outcomes versus cost and worries about hidden complexity.",
+        "likely_priorities": ["price", "ROI", "efficiency"],
+        "share": 0.19
+      },
+      "interpretation": "Fast drafting sounds useful, but I need pricing and workflow-fit to assess real ROI. The value is promising, yet cost transparency is missing.",
+      "quote": "Sounds useful, but what does it cost and how much manual cleanup am I really looking at?",
+      "key_points": ["Efficiency appeal", "ROI uncertainty"],
+      "risks": ["Pricing ambiguity creates hesitation"],
+      "signals": {
+        "clarity": 74.0,
+        "trust": 58.0,
+        "hype": 45.0,
+        "confusion": 31.0,
+        "credibility": 61.0
+      },
+      "outlier": false
+    },
+    {
+      "persona": {
+        "name": "Industry Insider",
+        "worldview": "Benchmarks claims against known patterns and competitive context.",
+        "likely_priorities": ["differentiation", "feasibility", "positioning"],
+        "share": 0.2
+      },
+      "interpretation": "Investor-update drafting is common, but predicting investor follow-up questions is potentially differentiating if quality is real. Positioning should clarify what data or reasoning drives predictions.",
+      "quote": "The update-drafting part is table stakes. The question-prediction angle could be interesting — if it actually works.",
+      "key_points": ["Potential differentiation", "Needs mechanism clarity"],
+      "risks": ["Insider audience may question defensibility"],
+      "signals": {
+        "clarity": 77.0,
+        "trust": 63.0,
+        "hype": 58.0,
+        "confusion": 24.0,
+        "credibility": 66.0
+      },
+      "outlier": false
+    },
+    {
+      "persona": {
+        "name": "Risk-Averse Decision Maker",
+        "worldview": "Prioritizes downside protection, compliance, and predictable outcomes.",
+        "likely_priorities": ["risk", "reliability", "credibility"],
+        "share": 0.16
+      },
+      "interpretation": "The productivity angle is clear, but reliability and data-handling safeguards are not explained. I interpret risk around factual errors and confidentiality unless controls are explicit.",
+      "quote": "What happens when this tool gets something wrong in an investor update? That's my career on the line.",
+      "key_points": ["Clear utility", "Safety concern"],
+      "risks": ["Confidentiality concerns", "Potential factual errors"],
+      "signals": {
+        "clarity": 72.0,
+        "trust": 27.0,
+        "hype": 39.0,
+        "confusion": 36.0,
+        "credibility": 53.0
+      },
+      "outlier": true
+    }
+  ],
+  "pairwise_distances": [
+    {"persona_a": "Enthusiastic Early Adopter", "persona_b": "Risk-Averse Decision Maker", "distance": 28.7},
+    {"persona_a": "Enthusiastic Early Adopter", "persona_b": "Skeptical Pragmatist", "distance": 24.1},
+    {"persona_a": "Enthusiastic Early Adopter", "persona_b": "Budget-Conscious Buyer", "distance": 23.3},
+    {"persona_a": "Enthusiastic Early Adopter", "persona_b": "Industry Insider", "distance": 18.5},
+    {"persona_a": "Skeptical Pragmatist", "persona_b": "Risk-Averse Decision Maker", "distance": 14.2},
+    {"persona_a": "Budget-Conscious Buyer", "persona_b": "Risk-Averse Decision Maker", "distance": 13.5},
+    {"persona_a": "Skeptical Pragmatist", "persona_b": "Budget-Conscious Buyer", "distance": 8.2},
+    {"persona_a": "Industry Insider", "persona_b": "Risk-Averse Decision Maker", "distance": 11.1},
+    {"persona_a": "Industry Insider", "persona_b": "Skeptical Pragmatist", "distance": 7.9},
+    {"persona_a": "Industry Insider", "persona_b": "Budget-Conscious Buyer", "distance": 8.5}
+  ],
+  "map_points": [
+    {
+      "persona_name": "Enthusiastic Early Adopter",
+      "audience_share": 0.24,
+      "x": 0.44,
+      "y": 0.36,
+      "signals": { "clarity": 86.0, "trust": 72.0, "hype": 84.0, "confusion": 18.0, "credibility": 68.0 },
+      "interpretation_excerpt": "This sounds like a high-leverage founder tool with obvious time savings and momentum potential.",
+      "outlier": false
+    },
+    {
+      "persona_name": "Skeptical Pragmatist",
+      "audience_share": 0.21,
+      "x": 0.1,
+      "y": 0.14,
+      "signals": { "clarity": 81.0, "trust": 55.0, "hype": 49.0, "confusion": 26.0, "credibility": 57.0 },
+      "interpretation_excerpt": "The proposition is clear, but the predictive component needs concrete benchmark data and failure modes.",
+      "outlier": false
+    },
+    {
+      "persona_name": "Budget-Conscious Buyer",
+      "audience_share": 0.19,
+      "x": 0.16,
+      "y": 0.22,
+      "signals": { "clarity": 74.0, "trust": 58.0, "hype": 45.0, "confusion": 31.0, "credibility": 61.0 },
+      "interpretation_excerpt": "Fast drafting sounds useful, but I need pricing and workflow-fit to assess real ROI.",
+      "outlier": false
+    },
+    {
+      "persona_name": "Industry Insider",
+      "audience_share": 0.2,
+      "x": 0.26,
+      "y": 0.32,
+      "signals": { "clarity": 77.0, "trust": 63.0, "hype": 58.0, "confusion": 24.0, "credibility": 66.0 },
+      "interpretation_excerpt": "Investor-update drafting is common, but predicting investor follow-up questions is potentially differentiating.",
+      "outlier": false
+    },
+    {
+      "persona_name": "Risk-Averse Decision Maker",
+      "audience_share": 0.16,
+      "x": -0.46,
+      "y": 0.06,
+      "signals": { "clarity": 72.0, "trust": 27.0, "hype": 39.0, "confusion": 36.0, "credibility": 53.0 },
+      "interpretation_excerpt": "The productivity angle is clear, but reliability and data-handling safeguards are not explained.",
+      "outlier": true
+    }
+  ],
+  "summary": {
+    "alignment_score": 82.5,
+    "divergence_score": 17.5,
+    "risk_index": 31.4,
+    "top_confusion_personas": ["Risk-Averse Decision Maker", "Budget-Conscious Buyer", "Skeptical Pragmatist"],
+    "low_trust_personas": ["Risk-Averse Decision Maker", "Skeptical Pragmatist", "Budget-Conscious Buyer"],
+    "key_misunderstanding_risks": [
+      {
+        "text": "Confidentiality concerns",
+        "severity": "high",
+        "personas": ["Risk-Averse Decision Maker"]
+      },
+      {
+        "text": "Potential factual errors",
+        "severity": "high",
+        "personas": ["Risk-Averse Decision Maker"]
+      },
+      {
+        "text": "Perceived as marketing language without hard numbers",
+        "severity": "medium",
+        "personas": ["Skeptical Pragmatist"]
+      },
+      {
+        "text": "Pricing ambiguity creates hesitation",
+        "severity": "medium",
+        "personas": ["Budget-Conscious Buyer"]
+      },
+      {
+        "text": "Insider audience may question defensibility",
+        "severity": "low",
+        "personas": ["Industry Insider"]
+      }
+    ]
+  }
+}

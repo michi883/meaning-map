@@ -1,0 +1,4 @@
+agent_environment: meaning-map
+agent_name: meaning-map
+description: MeaningMap interpretation pipeline
+entrypoint_file: main.py

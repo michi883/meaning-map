@@ -1,0 +1,35 @@
+name: meaning-map
+region: nyc
+services:
+  - name: web
+    environment_slug: python
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-1gb
+    source_dir: /
+    github:
+      repo: michi883/meaning-map
+      branch: main
+      deploy_on_push: true
+    build_command: pip install -r requirements.txt
+    run_command: uvicorn backend.app:app --host 0.0.0.0 --port 8080
+    http_port: 8080
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 10
+      period_seconds: 15
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+    envs:
+      - key: GRADIENT_MODEL_ACCESS_KEY
+        scope: RUN_TIME
+        type: SECRET
+        value: REPLACE_ME
+      - key: GRADIENT_MODEL_ID
+        scope: RUN_TIME
+        type: GENERAL
+        value: openai-gpt-oss-120b
+      - key: GRADIENT_BASE_URL
+        scope: RUN_TIME
+        type: GENERAL
+        value: https://inference.do-ai.run/v1/

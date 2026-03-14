@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MeaningMap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <div class="ambient">
+      <span class="orb orb-a"></span>
+      <span class="orb orb-b"></span>
+      <span class="orb orb-c"></span>
+      <span class="mesh"></span>
+    </div>
+
+    <main class="page-shell">
+      <!-- Input card -->
+      <form id="meaning-form" class="input-card">
+        <label>
+          Message
+          <textarea id="content" name="content" required
+            placeholder="Paste a startup pitch, social post, product announcement, or joke..."
+          >We built an AI copilot for founders that drafts investor updates in 60 seconds and predicts likely investor follow-up questions.</textarea>
+        </label>
+        <div class="chip-group">
+          <span class="chip-label">Message type</span>
+          <div class="chips" id="message-type-chips">
+            <button type="button" class="chip selected" data-value="startup_pitch">Startup pitch</button>
+            <button type="button" class="chip" data-value="social_post">Social post</button>
+            <button type="button" class="chip" data-value="product_launch">Product launch</button>
+            <button type="button" class="chip" data-value="cold_email">Cold email</button>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="run-btn" type="submit">Map interpretation space &rarr;</button>
+          <button id="sample-btn" type="button" class="ghost">Load Demo Result</button>
+        </div>
+        <p id="status" class="status">Ready.</p>
+      </form>
+
+      <!-- Cinematic loading overlay (item 1) -->
+      <div id="loading-stage" class="loading-stage hidden">
+        <div class="loading-spinner"></div>
+        <p id="loading-text" class="loading-text">Generating audience personas...</p>
+        <div class="loading-avatars" id="loading-avatars"></div>
+        <div class="loading-progress-wrap hidden" id="loading-progress-wrap">
+          <div class="loading-progress-bar" id="loading-progress-bar"></div>
+        </div>
+      </div>
+
+      <!-- Pre-submit skeleton (item 8) -->
+      <div id="skeleton-state" class="skeleton-state">
+        <div class="skeleton-overlay">Submit a message to map how different audiences will interpret it.</div>
+        <div class="skeleton-cards">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+      </div>
+
+      <!-- Results wrapper — all results sections live here, hidden until rendered -->
+      <div id="results-wrap" class="results-wrap hidden">
+
+        <!-- Dynamic header -->
+        <header id="results-header" class="results-header reveal-section">
+          <p class="status-pill" id="status-pill"></p>
+          <h1 id="dynamic-headline" class="dynamic-headline"></h1>
+          <blockquote id="submitted-message" class="submitted-message"></blockquote>
+        </header>
+
+        <!-- Outlier alert (item 2) -->
+        <div id="outlier-banner" class="outlier-card hidden reveal-section"></div>
+
+        <!-- Signal cards row (item 6) -->
+        <div id="signal-cards" class="signal-cards reveal-section"></div>
+
+        <!-- Map — full width (item 4) -->
+        <article class="map-card reveal-section">
+          <div class="map-header"><h2>Interpretation Space</h2></div>
+          <div id="map-root" class="map-root"></div>
+        </article>
+
+        <!-- Persona cards grid (item 3) -->
+        <section class="persona-section reveal-section">
+          <h2 class="section-title">How they read it</h2>
+          <div id="persona-grid" class="persona-grid"></div>
+        </section>
+
+        <!-- Misunderstanding risks (item 5) -->
+        <article class="risk-card reveal-section">
+          <h2>Misunderstanding Risks</h2>
+          <ul id="risk-list"></ul>
+        </article>
+      </div>
+    </main>
+
+    <!-- Fix drawer (item 5) -->
+    <div id="fix-drawer-overlay" class="drawer-overlay hidden"></div>
+    <aside id="fix-drawer" class="fix-drawer hidden">
+      <div class="drawer-header">
+        <h3>Fix with AI</h3>
+        <button id="drawer-close" class="drawer-close" type="button">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <p class="drawer-label">Original message</p>
+        <div id="drawer-original" class="drawer-original"></div>
+        <p class="drawer-label">Suggested rewrite</p>
+        <div id="drawer-rewrite" class="drawer-rewrite">
+          <div class="skeleton-line"></div><div class="skeleton-line short"></div><div class="skeleton-line"></div>
+        </div>
+      </div>
+      <div class="drawer-actions">
+        <button id="drawer-copy" class="drawer-btn" type="button">Copy rewrite</button>
+        <button id="drawer-use" class="drawer-btn primary" type="button">Use this version</button>
+      </div>
+    </aside>
+
+    <script src="/assets/app.js" defer></script>
+  </body>
+</html>

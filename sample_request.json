@@ -1,0 +1,8 @@
+{
+  "content": "We built an AI copilot for founders that drafts investor updates in 60 seconds and predicts likely investor follow-up questions.",
+  "message_type": "startup_pitch",
+  "context": "Posting this in a startup founder community and sharing with angels.",
+  "objective": "Increase credibility while still sounding exciting.",
+  "num_personas": 5,
+  "temperature": 0.2
+}
