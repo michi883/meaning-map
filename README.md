@@ -122,8 +122,8 @@ This repo now includes an App Platform spec at `.do/app.yaml`.
 
 1. Push this codebase to GitHub (App Platform deploys from GitHub repos).
 2. Edit `.do/app.yaml` and set:
-   - `services[0].github.repo` to `YOUR_GITHUB_OWNER/YOUR_REPO`
-   - `services[0].github.branch` to your deploy branch
+   - `services[0].git.repo_clone_url` to your public repo URL
+   - `services[0].git.branch` to your deploy branch
    - `GRADIENT_MODEL_ACCESS_KEY` to your real key (starts with `sk-do-`)
 3. Authenticate `doctl`:
 
@@ -147,8 +147,8 @@ doctl apps logs <APP_ID> --type run
 ```
 
 6. Future deploys:
-   - Push to the configured branch if `deploy_on_push: true`
-   - Or update manually:
+   - Push to the configured git branch
+   - Then redeploy:
 
 ```bash
 doctl apps update <APP_ID> --spec .do/app.yaml

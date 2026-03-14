@@ -6,10 +6,9 @@ services:
     instance_count: 1
     instance_size_slug: apps-s-1vcpu-1gb
     source_dir: /
-    github:
-      repo: michi883/meaning-map
+    git:
+      repo_clone_url: https://github.com/michi883/meaning-map.git
       branch: main
-      deploy_on_push: true
     build_command: pip install -r requirements.txt
     run_command: uvicorn backend.app:app --host 0.0.0.0 --port 8080
     http_port: 8080
