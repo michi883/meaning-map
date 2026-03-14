@@ -32,6 +32,9 @@ const drawerRewrite = document.getElementById("drawer-rewrite");
 const drawerCopy = document.getElementById("drawer-copy");
 const drawerUse = document.getElementById("drawer-use");
 
+const historyPanel = document.getElementById("history-panel");
+const historyToggle = document.getElementById("history-toggle");
+const historyCount = document.getElementById("history-count");
 const historyList = document.getElementById("history-list");
 const searchInput = document.getElementById("search-input");
 const searchBtn = document.getElementById("search-btn");
@@ -537,9 +540,26 @@ window.addEventListener("resize", () => { if (mapRoot.childElementCount > 0 && l
 // ══════════════════════════════════════════════
 // History & semantic search (PostgreSQL + pgvector)
 // ══════════════════════════════════════════════
+
+// Toggle collapsed/expanded, persist in localStorage
+historyToggle.addEventListener("click", () => {
+  const collapsed = historyPanel.classList.toggle("collapsed");
+  localStorage.setItem("mm-history-collapsed", collapsed ? "1" : "0");
+});
+
+// Restore saved state (default: collapsed)
+if (localStorage.getItem("mm-history-collapsed") === "0") {
+  historyPanel.classList.remove("collapsed");
+}
+
 function alignBadge(val) {
   const cls = val >= 80 ? "align-good" : val >= 50 ? "align-mid" : "align-low";
   return `<span class="history-badge ${cls}">${Number(val).toFixed(0)}% aligned</span>`;
+}
+
+function updateHistoryCount(count) {
+  historyCount.textContent = `${count} saved`;
+  historyCount.classList.toggle("hidden", count === 0);
 }
 
 function renderHistoryItems(items, showSimilarity) {
@@ -569,7 +589,8 @@ async function loadHistory() {
     const resp = await fetch("/api/history?limit=20");
     if (!resp.ok) return;
     const data = await resp.json();
-    if (!data.db_available) { historyList.innerHTML = '<p class="history-empty">Database not connected.</p>'; return; }
+    if (!data.db_available) { historyList.innerHTML = '<p class="history-empty">Database not connected.</p>'; updateHistoryCount(0); return; }
+    updateHistoryCount(data.items.length);
     renderHistoryItems(data.items, false);
   } catch { /* silent */ }
 }
@@ -610,9 +631,6 @@ async function loadAnalysis(id) {
 
 searchBtn.addEventListener("click", searchHistory);
 searchInput.addEventListener("keydown", (e) => { if (e.key === "Enter") searchHistory(); });
-
-// Refresh history after a new analysis completes
-const _origRunMeaningMap = runMeaningMap;
 
 // Item 8: Show skeleton on initial load (don't auto-load sample)
 loadHistory();

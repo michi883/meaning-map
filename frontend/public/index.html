@@ -22,6 +22,24 @@
     </div>
 
     <main class="page-shell">
+      <!-- Past analyses — collapsed by default, above input -->
+      <div id="history-panel" class="history-panel collapsed">
+        <button type="button" id="history-toggle" class="history-toggle">
+          <span class="history-toggle-label">Past analyses</span>
+          <span id="history-count" class="history-count hidden">0</span>
+          <svg class="history-chevron" viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
+        </button>
+        <div class="history-body">
+          <div class="search-wrap">
+            <input id="search-input" type="text" class="search-input" placeholder="Semantic search past analyses..." />
+            <button id="search-btn" type="button" class="search-btn">Search</button>
+          </div>
+          <div id="history-list" class="history-list">
+            <p class="history-empty">No past analyses yet.</p>
+          </div>
+        </div>
+      </div>
+
       <!-- Input card -->
       <form id="meaning-form" class="input-card">
         <label>
@@ -45,20 +63,6 @@
         </div>
         <p id="status" class="status">Ready.</p>
       </form>
-
-      <!-- History & semantic search panel -->
-      <div id="history-panel" class="history-panel">
-        <div class="history-header">
-          <h2 class="history-title">Past Analyses</h2>
-          <div class="search-wrap">
-            <input id="search-input" type="text" class="search-input" placeholder="Semantic search past analyses..." />
-            <button id="search-btn" type="button" class="search-btn">Search</button>
-          </div>
-        </div>
-        <div id="history-list" class="history-list">
-          <p class="history-empty">No past analyses yet.</p>
-        </div>
-      </div>
 
       <!-- Cinematic loading overlay (item 1) -->
       <div id="loading-stage" class="loading-stage hidden">
