@@ -60,7 +60,7 @@ Before any submission, three ghosted skeleton cards are shown with a prompt over
 All entrance animations are wrapped in `@media (prefers-reduced-motion: no-preference)` and are disabled for users who prefer reduced motion.
 
 ### Past analyses & semantic search
-All analyses are automatically saved to a DigitalOcean Managed PostgreSQL database with pgvector. Each saved analysis includes a vector embedding of the original message (generated via the Gradient Embeddings API), enabling semantic search across your history. The "Past Analyses" panel below the input form shows recent analyses and lets you search by meaning — e.g. searching "pricing concerns" finds past analyses of messages that discussed pricing, even if different words were used.
+All analyses are automatically saved to a DigitalOcean Managed PostgreSQL database with pgvector. Each saved analysis includes a vector embedding of the original message (generated via the Gradient Embeddings API), enabling semantic search across your history. The "Past Analyses" panel sits above the input form, collapsed by default into a lightweight trigger row showing the saved count. Clicking it expands the list with a semantic search bar — e.g. searching "pricing concerns" finds past analyses of messages that discussed pricing, even if different words were used. Clicking any history item reloads that analysis with the full cinematic reveal. The collapsed/expanded state is persisted in localStorage.
 
 ## Project Structure
 
