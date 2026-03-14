@@ -39,11 +39,4 @@ services:
       - key: DATABASE_URL
         scope: RUN_TIME
         type: SECRET
-        value: ${db.DATABASE_URL}
-
-databases:
-  - name: db
-    engine: PG
-    version: "16"
-    size: db-s-1vcpu-1gb
-    num_nodes: 1
+        value: REPLACE_ME
