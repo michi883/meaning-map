@@ -11,6 +11,7 @@ import asyncpg
 logger = logging.getLogger(__name__)
 
 _pool: asyncpg.Pool | None = None
+_vector_registered = False
 
 EMBEDDING_DIM = 1536
 
@@ -37,7 +38,8 @@ CREATE INDEX IF NOT EXISTS analyses_embedding_idx ON analyses USING hnsw (embedd
 """
 
 
-async def get_pool() -> asyncpg.Pool:
+async def _get_raw_pool() -> asyncpg.Pool:
+    """Get or create the connection pool WITHOUT registering pgvector codec."""
     global _pool
     if _pool is None:
         database_url = os.getenv("DATABASE_URL", "").strip()
@@ -49,29 +51,51 @@ async def get_pool() -> asyncpg.Pool:
             max_size=5,
             statement_cache_size=0,
         )
-        await _register_vector(_pool)
     return _pool
 
 
-async def _register_vector(pool: asyncpg.Pool) -> None:
-    """Register pgvector codec so asyncpg can handle vector columns."""
+async def get_pool() -> asyncpg.Pool:
+    """Get the connection pool with pgvector codec registered."""
+    pool = await _get_raw_pool()
+    await _ensure_vector_registered(pool)
+    return pool
+
+
+async def _ensure_vector_registered(pool: asyncpg.Pool) -> None:
+    global _vector_registered
+    if _vector_registered:
+        return
     from pgvector.asyncpg import register_vector
     async with pool.acquire() as conn:
         await register_vector(conn)
+    _vector_registered = True
 
 
 async def init_db() -> None:
-    pool = await get_pool()
+    # 1. Get pool without vector codec (extension may not exist yet)
+    pool = await _get_raw_pool()
+    # 2. Create extension + table
     async with pool.acquire() as conn:
         await conn.execute(_INIT_SQL)
-    logger.info("Database initialized (analyses table ready)")
+    # 3. Now that the extension exists, register the codec
+    await _ensure_vector_registered(pool)
+    logger.info("Database initialized (analyses table + pgvector ready)")
 
 
 async def close_db() -> None:
-    global _pool
+    global _pool, _vector_registered
     if _pool is not None:
         await _pool.close()
         _pool = None
+        _vector_registered = False
+
+
+async def _conn_with_vector(pool: asyncpg.Pool) -> asyncpg.Connection:
+    """Acquire a connection with pgvector codec registered."""
+    from pgvector.asyncpg import register_vector
+    conn = await pool.acquire()
+    await register_vector(conn)
+    return conn
 
 
 async def save_analysis(
@@ -92,7 +116,8 @@ async def save_analysis(
     persona_count = len(result.get("personas", []))
 
     async with pool.acquire() as conn:
-        await register_vector_on_conn(conn)
+        from pgvector.asyncpg import register_vector
+        await register_vector(conn)
         await conn.execute(
             """
             INSERT INTO analyses (id, content, message_type, model, alignment, divergence, persona_count, summary, result, embedding)
@@ -112,12 +137,7 @@ async def save_analysis(
     return analysis_id
 
 
-async def register_vector_on_conn(conn: asyncpg.Connection) -> None:
-    from pgvector.asyncpg import register_vector
-    await register_vector(conn)
-
-
-def _to_pgvector(embedding: list[float] | None) -> str | None:
+def _to_pgvector(embedding: list[float] | None):
     if embedding is None:
         return None
     import numpy as np
@@ -159,7 +179,8 @@ async def search_analyses(embedding: list[float], limit: int = 10) -> list[dict[
     vec = np.array(embedding, dtype=np.float32)
 
     async with pool.acquire() as conn:
-        await register_vector_on_conn(conn)
+        from pgvector.asyncpg import register_vector
+        await register_vector(conn)
         rows = await conn.fetch(
             """
             SELECT id, created_at, content, message_type, model, alignment, divergence, persona_count,
