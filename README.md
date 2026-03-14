@@ -6,6 +6,18 @@ MeaningMap is an AI-powered audience interpretation simulator. You paste a messa
 
 Every message lands differently depending on who reads it. A founder's pitch that excites an early adopter may trigger skepticism in a risk-averse decision maker. MeaningMap makes that divergence visible *before* you hit send. It answers the question: "How will your audience read this?"
 
+## DigitalOcean Gradient AI Full Stack
+
+MeaningMap uses five DigitalOcean Gradient AI platform features end-to-end:
+
+| Layer | DO Service | Usage |
+|---|---|---|
+| **AI Inference** | Gradient GenAI API | LLM calls for persona generation, interpretation agents, and AI rewrites |
+| **Embeddings** | Gradient Embeddings API | Vector embeddings for every analyzed message, enabling semantic search |
+| **Agent Framework** | Gradient ADK | Agent entrypoint, configuration, and deployment (`gradient agent deploy`) |
+| **Database** | Managed PostgreSQL + pgvector | Persistent storage for analyses with vector similarity search |
+| **Hosting** | App Platform | Production deployment with managed database binding, health checks, and auto-deploy |
+
 ## What the Pipeline Does
 
 1. **Persona generation** — Given a message and its type, the LLM generates a realistic distribution of audience personas (e.g. "Skeptical Pragmatist", "Budget-Conscious Buyer"), each with a worldview, priorities, and audience share percentage.
@@ -46,30 +58,36 @@ Before any submission, three ghosted skeleton cards are shown with a prompt over
 ### Accessibility
 All entrance animations are wrapped in `@media (prefers-reduced-motion: no-preference)` and are disabled for users who prefer reduced motion.
 
+### Past analyses & semantic search
+All analyses are automatically saved to a DigitalOcean Managed PostgreSQL database with pgvector. Each saved analysis includes a vector embedding of the original message (generated via the Gradient Embeddings API), enabling semantic search across your history. The "Past Analyses" panel below the input form shows recent analyses and lets you search by meaning — e.g. searching "pricing concerns" finds past analyses of messages that discussed pricing, even if different words were used.
+
 ## Project Structure
 
 ```
 main.py                            Gradient ADK entrypoint (run(payload, context))
 backend/
-  app.py                           FastAPI server — routes: /, /health, /sample-result, /api/analyze, /api/fix
+  app.py                           FastAPI server — routes: /, /health, /api/analyze, /api/fix, /api/history, /api/search
   core/
     pipeline.py                    Orchestrates persona generation + parallel interpretation agents
     schemas.py                     Pydantic models (request, persona, interpretation, signals, map points, summary)
     analysis.py                    Scoring math: pairwise distances, map projection, summary + structured risk extraction
     client.py                      OpenAI-compatible LLM client (Gradient inference API)
+    embeddings.py                  Gradient Embeddings API client for vector generation
     prompts.py                     System prompts for persona generation and interpretation
+    db.py                          PostgreSQL + pgvector: schema init, CRUD, semantic search
   run_local.py                     CLI runner for testing without the web server
 frontend/public/
-  index.html                       Page structure: input form, loading stage, skeleton state, results sections, fix drawer
+  index.html                       Page structure: input form, history panel, loading stage, results sections, fix drawer
   assets/
-    styles.css                     Dark theme, animations (fadeUp, dotPop, pulseRing, spin), responsive breakpoints
-    app.js                         All UI logic: cinematic loading, map rendering, persona cards, risk list, fix drawer
+    styles.css                     Dark theme, animations, history/search panel styles, responsive breakpoints
+    app.js                         All UI logic: cinematic loading, map, persona cards, risk list, fix drawer, history, search
   sample-result.json               Bundled demo result for offline/demo use
 tests/
   test_analysis.py                 Deterministic tests for normalization, pairwise distances, summary, map bounds
 sample_request.json                Example API request payload
 .env.example                       Template for environment variables
 .gradient/agent.yml                Gradient ADK agent configuration
+.do/app.yaml                       App Platform spec with managed PostgreSQL database
 ```
 
 ## Setup
@@ -88,6 +106,8 @@ Set in `.env`:
 | `GRADIENT_MODEL_ACCESS_KEY` | Yes | — | API key for Gradient inference (must start with `sk-do-`) |
 | `GRADIENT_MODEL_ID` | No | `openai-gpt-oss-120b` | Model identifier |
 | `GRADIENT_BASE_URL` | No | `https://inference.do-ai.run/v1/` | Inference API base URL |
+| `GRADIENT_EMBEDDING_MODEL_ID` | No | `text-embedding-3-small` | Embedding model for semantic search |
+| `DATABASE_URL` | No | — | PostgreSQL connection string (enables persistence + semantic search) |
 | `DIGITALOCEAN_API_TOKEN` | Deploy only | — | Required for `gradient agent deploy` |
 
 ## Running Locally
@@ -234,9 +254,35 @@ Generates an AI rewrite addressing a specific risk for a specific persona.
 }
 ```
 
+### `GET /api/history`
+
+Returns recent analyses (requires `DATABASE_URL`).
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `limit` | int | 20 | Max items to return (1–100) |
+| `offset` | int | 0 | Pagination offset |
+
+**Response:** `{"items": [...], "db_available": true}`
+
+### `GET /api/history/{id}`
+
+Returns the full result for a saved analysis by UUID.
+
+### `GET /api/search`
+
+Semantic search across past analyses using pgvector cosine similarity. The query is embedded via the Gradient Embeddings API and matched against stored analysis embeddings.
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `q` | string | required | Search query |
+| `limit` | int | 10 | Max results (1–50) |
+
+**Response:** `{"results": [{..., "similarity": 0.92}, ...], "db_available": true}`
+
 ### `GET /health`
 
-Returns `{"status": "ok"}`.
+Returns `{"status": "ok", "database": true|false}`.
 
 ### `GET /sample-result`
 

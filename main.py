@@ -48,4 +48,32 @@ async def run(payload: dict, context: dict) -> dict:
         }
 
     result = await pipeline.run(request)
-    return result.model_dump(mode="json")
+    result_dict = result.model_dump(mode="json")
+
+    # Persist to DB if DATABASE_URL is configured
+    try:
+        import os
+        if os.getenv("DATABASE_URL", "").strip():
+            from backend.core.db import init_db, save_analysis
+            from backend.core.embeddings import GradientEmbeddingsClient
+
+            await init_db()
+            embedding = None
+            try:
+                emb_client = GradientEmbeddingsClient.from_env()
+                embedding = await emb_client.embed(request.content)
+            except Exception:
+                pass
+            analysis_id = await save_analysis(
+                content=request.content,
+                message_type=request.message_type,
+                model=result_dict.get("model", "unknown"),
+                summary=result_dict.get("summary", {}),
+                result=result_dict,
+                embedding=embedding,
+            )
+            result_dict["analysis_id"] = analysis_id
+    except Exception:
+        pass
+
+    return result_dict

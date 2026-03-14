@@ -45,6 +45,20 @@
         <p id="status" class="status">Ready.</p>
       </form>
 
+      <!-- History & semantic search panel -->
+      <div id="history-panel" class="history-panel">
+        <div class="history-header">
+          <h2 class="history-title">Past Analyses</h2>
+          <div class="search-wrap">
+            <input id="search-input" type="text" class="search-input" placeholder="Semantic search past analyses..." />
+            <button id="search-btn" type="button" class="search-btn">Search</button>
+          </div>
+        </div>
+        <div id="history-list" class="history-list">
+          <p class="history-empty">No past analyses yet.</p>
+        </div>
+      </div>
+
       <!-- Cinematic loading overlay (item 1) -->
       <div id="loading-stage" class="loading-stage hidden">
         <div class="loading-spinner"></div>

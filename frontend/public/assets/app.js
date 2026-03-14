@@ -32,6 +32,10 @@ const drawerRewrite = document.getElementById("drawer-rewrite");
 const drawerCopy = document.getElementById("drawer-copy");
 const drawerUse = document.getElementById("drawer-use");
 
+const historyList = document.getElementById("history-list");
+const searchInput = document.getElementById("search-input");
+const searchBtn = document.getElementById("search-btn");
+
 const SIGNALS = ["clarity", "trust", "hype", "confusion", "credibility"];
 const PERSONA_COLORS = ["#1D9E75", "#378ADD", "#BA7517", "#993C1D", "#A32D2D"];
 
@@ -501,6 +505,7 @@ async function runMeaningMap() {
     const result = await response.json();
     await cinematicReveal(result);
     setStatus(`Mapped ${result.personas.length} personas using ${result.model}.`);
+    loadHistory();
   } catch (error) {
     loadingStage.classList.add("hidden");
     setStatus(`Analysis failed: ${error.message}`, "error");
@@ -529,4 +534,85 @@ form.addEventListener("submit", async (e) => { e.preventDefault(); await runMean
 sampleBtn.addEventListener("click", async () => { await loadSample(); });
 window.addEventListener("resize", () => { if (mapRoot.childElementCount > 0 && lastMapPoints.length) renderMap(lastMapPoints); });
 
+// ══════════════════════════════════════════════
+// History & semantic search (PostgreSQL + pgvector)
+// ══════════════════════════════════════════════
+function alignBadge(val) {
+  const cls = val >= 80 ? "align-good" : val >= 50 ? "align-mid" : "align-low";
+  return `<span class="history-badge ${cls}">${Number(val).toFixed(0)}% aligned</span>`;
+}
+
+function renderHistoryItems(items, showSimilarity) {
+  if (!items.length) { historyList.innerHTML = '<p class="history-empty">No results found.</p>'; return; }
+  historyList.innerHTML = "";
+  items.forEach(item => {
+    const el = document.createElement("div");
+    el.className = "history-item";
+    const sim = showSimilarity && item.similarity != null ? `<span class="similarity">${(item.similarity * 100).toFixed(0)}% match</span>` : "";
+    const date = new Date(item.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    el.innerHTML = `
+      <p class="history-item-content">${item.content}</p>
+      <div class="history-item-meta">
+        ${sim}
+        ${alignBadge(item.alignment)}
+        <span class="history-chip">${item.persona_count} personas</span>
+        <span>${date}</span>
+      </div>
+    `;
+    el.addEventListener("click", () => loadAnalysis(item.id));
+    historyList.appendChild(el);
+  });
+}
+
+async function loadHistory() {
+  try {
+    const resp = await fetch("/api/history?limit=20");
+    if (!resp.ok) return;
+    const data = await resp.json();
+    if (!data.db_available) { historyList.innerHTML = '<p class="history-empty">Database not connected.</p>'; return; }
+    renderHistoryItems(data.items, false);
+  } catch { /* silent */ }
+}
+
+async function searchHistory() {
+  const q = searchInput.value.trim();
+  if (!q) { loadHistory(); return; }
+  searchBtn.disabled = true;
+  searchBtn.textContent = "Searching...";
+  try {
+    const resp = await fetch(`/api/search?q=${encodeURIComponent(q)}&limit=10`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    renderHistoryItems(data.results, true);
+  } catch (e) {
+    historyList.innerHTML = `<p class="history-empty">Search failed: ${e.message}</p>`;
+  } finally {
+    searchBtn.disabled = false;
+    searchBtn.textContent = "Search";
+  }
+}
+
+async function loadAnalysis(id) {
+  clearResults();
+  skeletonState.classList.add("hidden");
+  setStatus("Loading past analysis...");
+  try {
+    const resp = await fetch(`/api/history/${id}`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const result = data.result;
+    await cinematicReveal(result);
+    setStatus(`Loaded past analysis (${result.model}).`);
+  } catch (e) {
+    setStatus(`Failed to load analysis: ${e.message}`, "error");
+  }
+}
+
+searchBtn.addEventListener("click", searchHistory);
+searchInput.addEventListener("keydown", (e) => { if (e.key === "Enter") searchHistory(); });
+
+// Refresh history after a new analysis completes
+const _origRunMeaningMap = runMeaningMap;
+
 // Item 8: Show skeleton on initial load (don't auto-load sample)
+loadHistory();
