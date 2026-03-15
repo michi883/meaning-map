@@ -262,6 +262,27 @@ button.ghost { background: rgba(13,31,55,0.86); color: #cae5f2; border: 1px soli
 
 /* ── Responsive ── */
 @media (max-width: 900px) { .persona-grid { grid-template-columns: 1fr; } }
+.toast-notification {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(1rem);
+  background: var(--bg-ink-2, #0e1e31);
+  color: var(--text-dim, #a0b4c8);
+  border: 1px solid var(--panel-border, rgba(131,219,255,0.26));
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 9999;
+  pointer-events: none;
+}
+.toast-notification.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 @media (max-width: 700px) {
   .page-shell { width: calc(100vw - 1rem); padding-top: 1rem; }
   .signal-cards { grid-template-columns: 1fr; }

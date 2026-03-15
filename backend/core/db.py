@@ -215,6 +215,32 @@ def _row_to_dict(row: asyncpg.Record) -> dict[str, Any]:
     }
 
 
+async def text_search_analyses(query: str, limit: int = 10) -> list[dict[str, Any]]:
+    """Full-text search fallback using ILIKE when vector search is unavailable."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT id, created_at, content, message_type, model, alignment, divergence, persona_count
+            FROM analyses
+            WHERE content ILIKE '%' || $1 || '%'
+            ORDER BY created_at DESC
+            LIMIT $2
+            """,
+            query,
+            limit,
+        )
+    return [_row_to_history_item(r) for r in rows]
+
+
+async def delete_all_analyses() -> int:
+    """Delete all analyses and return the count of deleted rows."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        result = await conn.execute("DELETE FROM analyses")
+    return int(result.split()[-1])
+
+
 def _row_to_history_item(row: asyncpg.Record) -> dict[str, Any]:
     return {
         "id": str(row["id"]),

@@ -195,13 +195,27 @@ async def get_history_item(analysis_id: str) -> dict:
 async def search(q: str = Query(..., min_length=1), limit: int = Query(10, ge=1, le=50)) -> dict:
     if not _db_available:
         return {"results": [], "db_available": False}
+
+    # Try semantic search first, fall back to text search
     try:
         from backend.core.embeddings import GradientEmbeddingsClient
         embeddings_client = GradientEmbeddingsClient.from_env()
         query_embedding = await embeddings_client.embed(q)
+        from backend.core.db import search_analyses
+        results = await search_analyses(embedding=query_embedding, limit=limit)
+        return {"results": results, "db_available": True}
     except Exception as exc:
-        raise HTTPException(status_code=500, detail={"error": f"Embedding failed: {exc}"}) from exc
+        logger.warning("Semantic search failed, falling back to text search: %s", exc)
 
-    from backend.core.db import search_analyses
-    results = await search_analyses(embedding=query_embedding, limit=limit)
+    from backend.core.db import text_search_analyses
+    results = await text_search_analyses(query=q, limit=limit)
     return {"results": results, "db_available": True}
+
+
+@app.delete("/api/history")
+async def clear_history() -> dict:
+    if not _db_available:
+        return {"deleted": 0, "db_available": False}
+    from backend.core.db import delete_all_analyses
+    deleted = await delete_all_analyses()
+    return {"deleted": deleted, "db_available": True}

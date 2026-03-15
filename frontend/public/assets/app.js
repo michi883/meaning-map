@@ -598,6 +598,19 @@ async function loadHistory() {
 async function searchHistory() {
   const q = searchInput.value.trim();
   if (!q) { loadHistory(); return; }
+
+  // Hidden /clear command
+  if (q === "/clear") {
+    searchInput.value = "";
+    try {
+      await fetch("/api/history", { method: "DELETE" });
+    } catch { /* silent */ }
+    historyList.innerHTML = "";
+    updateHistoryCount(0);
+    showToast("Search history cleared.");
+    return;
+  }
+
   searchBtn.disabled = true;
   searchBtn.textContent = "Searching...";
   try {
@@ -611,6 +624,18 @@ async function searchHistory() {
     searchBtn.disabled = false;
     searchBtn.textContent = "Search";
   }
+}
+
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.className = "toast-notification";
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add("visible"));
+  setTimeout(() => {
+    toast.classList.remove("visible");
+    setTimeout(() => toast.remove(), 300);
+  }, 2500);
 }
 
 async function loadAnalysis(id) {
