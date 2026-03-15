@@ -19,6 +19,12 @@ MeaningMap uses six DigitalOcean Gradient AI platform capabilities end-to-end:
 | **Database** | Managed PostgreSQL + pgvector | Persistent storage for analyses with vector similarity search via HNSW index |
 | **Hosting** | App Platform | Web app deployment with health checks and auto-deploy from GitHub |
 
+## Architecture
+
+<p align="center">
+  <img src="architecture.png" alt="MeaningMap Architecture" width="100%">
+</p>
+
 ## What the Pipeline Does
 
 1. **Persona generation** — Given a message and its type, the LLM generates a realistic distribution of audience personas (e.g. "Skeptical Pragmatist", "Budget-Conscious Buyer"), each with a worldview, priorities, and audience share percentage.
